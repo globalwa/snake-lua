@@ -4,11 +4,12 @@ Snake = {}
 
 function Snake:load()
     self.color = {0, 255, 0, 1}
-    self.length = 15
+    self.length = 3
     self.speed = 300
     self.timer = 0
-    self.rate = 0.3
+    self.rate = 0.085
     self.newDirection = nil
+    self.score = 0
 
     self.parts = self:generate()
 end
@@ -40,6 +41,49 @@ function Snake:generate()
     return parts
 end
 
+function Snake:extend()
+    local lastPart = self.parts[#self.parts]
+    local x, y
+
+    if lastPart.direction == "up" then
+        y = lastPart.y + lastPart.height
+        x = lastPart.x
+    elseif lastPart.direction == "down" then
+        y = lastPart.y - lastPart.height
+        x = lastPart.x
+    elseif lastPart.direction == "left" then
+        y = lastPart.y
+        x = lastPart.x + lastPart.width
+    elseif lastPart.direction == "right" then
+        y = lastPart.y
+        x = lastPart.x - lastPart.width
+    end
+
+    local part = Part:new(
+        lastPart.width, lastPart.height,
+        x, y,
+        lastPart.direction, false
+    )
+    part.positions = {unpack(lastPart.positions)}
+
+    table.insert(self.parts, part)
+end
+
+function Snake:addPoints(elapsedSeconds, givenSeconds, maxReward)
+    local percent = elapsedSeconds * (givenSeconds / 100) * 100
+    local reward = nil
+
+    if percent <= 25 then
+        reward = maxReward
+    elseif percent <= 65 then
+        reward = math.floor(maxReward / 2)
+    else
+        reward = math.floor(maxReward / 4)
+    end
+
+    self.score = self.score + reward
+end
+
 
 function Snake:update(dt)
     self.timer = self.timer + dt
@@ -49,6 +93,7 @@ function Snake:update(dt)
 
         if self:checkBoundaries() or self:checkCollision() then
             self:load()
+            Food:load()
         end
 
         self.timer = 0
