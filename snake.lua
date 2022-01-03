@@ -5,11 +5,15 @@ Snake = {}
 function Snake:load()
     self.color = {0, 255, 0, 1}
     self.length = 3
-    self.speed = 300
     self.timer = 0
     self.rate = 0.085
-    self.newDirection = nil
     self.score = 0
+    self.partProperties = {
+        width = 20,
+        height = 20
+    }
+
+    self.newDirection = nil
 
     self.parts = self:generate()
 end
@@ -17,25 +21,23 @@ end
 function Snake:generate()
     local parts = {}
 
-    local width = 20
-    local height = width
     local x = love.graphics.getWidth() / 2
     local y = love.graphics.getHeight() / 2
     local isHead = true
 
-    for i = 1, self.length do
+    for i=1, self.length do
 
         if i ~= 1 then
             isHead = false
         end
 
         parts[i] = Part:new(
-            width, height,
+            self.partProperties.width, self.partProperties.height,
             x, y,
             "left", isHead
         )
 
-        x = x + width
+        x = x + self.partProperties.width
     end
 
     return parts
@@ -43,7 +45,8 @@ end
 
 function Snake:extend()
     local lastPart = self.parts[#self.parts]
-    local x, y
+    local x = nil
+    local y = nil
 
     if lastPart.direction == "up" then
         y = lastPart.y + lastPart.height
@@ -69,8 +72,8 @@ function Snake:extend()
     table.insert(self.parts, part)
 end
 
-function Snake:addPoints(elapsedSeconds, givenSeconds, maxReward)
-    local percent = elapsedSeconds * (givenSeconds / 100) * 100
+function Snake:getReward(elapsedSeconds, givenSeconds, maxReward)
+    local percent = (elapsedSeconds / givenSeconds) * 100
     local reward = nil
 
     if percent <= 25 then
@@ -87,6 +90,7 @@ end
 
 function Snake:update(dt)
     self.timer = self.timer + dt
+
     if self.timer >= self.rate then
         self:setNewDirection()
         self:move()

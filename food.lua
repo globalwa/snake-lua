@@ -14,10 +14,9 @@ function Food:load()
     self.color = {255, 0, 0, 1}
     self.width = 20
     self.height = self.width
-    self.minTimer = 5
-    self.maxTimer = 8
-    self.reward = 64
+    self.reward = 100
     self.timer = 0
+    self.rate = 5
     self.isCreated = false
 
     self.chosenTimer = nil
@@ -27,7 +26,7 @@ function Food:load()
     if not self.positions then
         self.positions = {
             x = findFoodPositions(love.graphics.getWidth(), self.width),
-            y = findFoodPositions(love.graphics.getHeight(), Food.height)
+            y = findFoodPositions(love.graphics.getHeight(), self.height)
         }
     end
 end
@@ -37,18 +36,22 @@ function Food:update(dt)
         self:create()
     else
         self.timer = self.timer + dt
-        if self.timer >= self.chosenTimer then
+        if self.timer >= self.rate then
+            Snake.score = Snake.score - self.reward / 2
             self.isCreated = false
         end
     end
 end
 
 function Food:create()
-    self.chosenTimer = love.math.random(self.minTimer, self.maxTimer)
     self.isCreated = true
     self.timer = 0
+    self.x, self.y = self:choosePosition()
+end
 
-    local x, y
+function Food:choosePosition()
+    local x = nil
+    local y = nil
 
     while true do
         local positionIsFound = true
@@ -68,8 +71,7 @@ function Food:create()
         end
     end
 
-    self.x = x
-    self.y = y
+    return x, y
 end
 
 function Food:draw()
