@@ -3,7 +3,7 @@ require("part")
 Snake = {}
 
 function Snake:load()
-    self.color = {35, 165, 35}
+    self.color = {0, 255, 0, 1}
     self.length = 15
     self.speed = 300
     self.timer = 0
@@ -45,7 +45,7 @@ function Snake:update(dt)
     self.timer = self.timer + dt
     if self.timer >= self.rate then
         self:setNewDirection()
-        self:move(dt)
+        self:move()
 
         if self:checkBoundaries() or self:checkCollision() then
             self:load()
@@ -57,7 +57,7 @@ function Snake:update(dt)
     self:getNewDirection()
 end
 
-function Snake:move(dt)
+function Snake:move()
     for _, part in ipairs(self.parts) do
         local position = part.positions[1]
 
@@ -169,6 +169,7 @@ end
 
 
 function Snake:draw()
+    love.graphics.setColor(self.color)
     for _, part in ipairs(self.parts) do
         love.graphics.rectangle(
             "fill",
